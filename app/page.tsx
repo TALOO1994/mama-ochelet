@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { searchFood, findBestMatch, FoodItem, getStatusLabel, getStatusEmoji } from '@/lib/foodDatabase';
 // findBestMatch used in MenuList popup
 import Tesseract from 'tesseract.js';
@@ -47,32 +47,132 @@ const WEEK_DATA: Record<number, { fruit: string; emoji: string; facts: string[] 
   40: { fruit: 'אבטיח', emoji: '🍉', facts: ['כ-3.5 ק"ג', 'מוכן לצאת לעולם!', 'מזל טוב - נס של חיים! 💕'] },
 };
 
-const SYMPTOMS: Record<string, { emoji: string; title: string; tip: string }[]> = {
-  first: [
-    { emoji: '🤢', title: 'בחילות בוקר', tip: 'ביסקוויט יבש לפני קימה, ג׳ינג׳ר ולימון עוזרים' },
-    { emoji: '😴', title: 'עייפות קיצונית', tip: 'גופך בונה שליה - מנוחה היא הכרחית' },
-    { emoji: '👃', title: 'רגישות לריחות', tip: 'הימני ממה שמגרה - יעבור בשליש שני' },
-    { emoji: '💛', title: 'רגישות בחזה', tip: 'חזייה תומכת טובה תעזור מאוד' },
-    { emoji: '🚽', title: 'תכיפות למתן שתן', tip: 'הרחם לוחץ על שלפוחית השתן - נורמלי' },
-    { emoji: '😢', title: 'שינויי מצב רוח', tip: 'ההורמונים בשיא - מותר לבכות!' },
-  ],
-  second: [
-    { emoji: '⚡', title: 'אנרגיה חוזרת', tip: 'השליש השני הוא לרוב הנוח ביותר!' },
-    { emoji: '🤰', title: 'הבטן מתעגלת', tip: 'משחת לחות תמנע סימני מתיחה' },
-    { emoji: '🦋', title: 'תנועות ראשונות', tip: 'סביב שבוע 18-20 תרגישי "פרפרים"' },
-    { emoji: '🔥', title: 'צרבת', tip: 'ארוחות קטנות ותכופות + הימני ממאכלים חריפים' },
-    { emoji: '😵‍💫', title: 'סחרחורות קלות', tip: 'קומי לאט, שתי מים, אכלי בקביעות' },
-    { emoji: '🦷', title: 'רגישות בחניכיים', tip: 'צחצוח עדין + פגישה עם רופא שיניים' },
-  ],
-  third: [
-    { emoji: '😤', title: 'קשיי נשימה קלים', tip: 'העובר לוחץ על הסרעפת - נורמלי' },
-    { emoji: '🦶', title: 'נפיחות ברגליים', tip: 'הגבהי רגליים, הפחיתי מלח, שתי מים' },
-    { emoji: '💪', title: 'צירי ברקסטון היקס', tip: 'צירים לא סדירים = אימון של הרחם' },
-    { emoji: '🌙', title: 'קשיי שינה', tip: 'כרית בין הרגליים ומתחת לבטן' },
-    { emoji: '🔙', title: 'כאבי גב תחתון', tip: 'שחייה ועמידה נכונה מפחיתות מאוד' },
-    { emoji: '🚿', title: 'חום ורגישות בגוף', tip: 'מקלחות פושרות ולבוש נוח ונושם' },
-  ],
-};
+const SYMPTOMS_BY_WEEK: { range: [number,number]; items: { emoji: string; title: string; tip: string }[] }[] = [
+  { range: [4,5], items: [
+    { emoji: '😴', title: 'עייפות פתאומית', tip: 'גופך עכשיו בונה שליה - ישני כשאפשר' },
+    { emoji: '🤢', title: 'בחילה ראשונה', tip: 'אכלי ביסקוויט יבש לפני שקמת מהמיטה' },
+    { emoji: '💛', title: 'רגישות בחזה', tip: 'חזייה תומכת - גם בלילה' },
+    { emoji: '🚽', title: 'ריצות לשירותים', tip: 'נורמלי לגמרי - ההורמונים גורמים לזה' },
+    { emoji: '😢', title: 'שינויי מצב רוח', tip: 'הורמון HCG עולה מהר - מותר לבכות' },
+    { emoji: '🌡️', title: 'חום גוף קל', tip: 'טמפרטורת גוף מעט גבוהה היא נורמלית' },
+  ]},
+  { range: [6,7], items: [
+    { emoji: '🤢', title: 'בחילות בשיא', tip: 'ג׳ינג׳ר, לימון, ושיבולת שועל בבוקר עוזרים' },
+    { emoji: '👃', title: 'רגישות קיצונית לריחות', tip: 'הימני מבישול - בקשי מישהו לבשל' },
+    { emoji: '😴', title: 'עייפות קשה', tip: 'שינה של 9-10 שעות - בסדר גמור' },
+    { emoji: '🫠', title: 'רוק מוגבר', tip: 'תופעה נפוצה - מציצת לימון יכולה להקל' },
+    { emoji: '💛', title: 'כאב בחזה', tip: 'הנחת קרח בגד עוזר, שתי הרבה מים' },
+    { emoji: '😰', title: 'חרדה ראשונית', tip: 'לגמרי נורמלי - דברי עם מישהי שאת סומכת עליה' },
+  ]},
+  { range: [8,9], items: [
+    { emoji: '🤢', title: 'בחילות כל היום', tip: 'אכלי מעט כל שעתיים במקום ארוחות גדולות' },
+    { emoji: '😴', title: 'עייפות מתמשכת', tip: 'שנת צהריים קצרה משנה את המצב' },
+    { emoji: '🤯', title: 'ראש כבד', tip: 'שתי הרבה מים, הימני ממסכים' },
+    { emoji: '🫀', title: 'דפיקות לב מהירות', tip: 'נפח הדם עולה - נורמלי, ציני לרופא' },
+    { emoji: '🔙', title: 'כאב גב תחתון', tip: 'כרית בין הברכיים בשינה' },
+    { emoji: '😵', title: 'סחרחורות', tip: 'קומי לאט תמיד, אכלי בקביעות' },
+  ]},
+  { range: [10,11], items: [
+    { emoji: '🤢', title: 'בחילות מתחילות לרדת', tip: 'סוף המנהרה מתחיל להיראות!' },
+    { emoji: '👗', title: 'בגדים מתחילים להדק', tip: 'הבטן מתחילה לצמוח - זמן לבגדי הריון' },
+    { emoji: '😴', title: 'עייפות עדיין כבדה', tip: 'עוד שבועיים-שלושה ותרגישי טוב יותר' },
+    { emoji: '🍔', title: 'תיאבון משתנה', tip: 'גם אם יש לך תשוקות מוזרות - בסדר' },
+    { emoji: '💭', title: 'שכחה קלה', tip: '"ערפל הריון" - רשמי הכל' },
+    { emoji: '🦷', title: 'חניכיים מדממות', tip: 'מברשת רכה וחוט דנטלי עדין' },
+  ]},
+  { range: [12,13], items: [
+    { emoji: '🎉', title: 'סוף השליש הראשון!', tip: 'הסיכון יורד משמעותית - מזל טוב!' },
+    { emoji: '⚡', title: 'אנרגיה חוזרת קצת', tip: 'תרגישי שיפור בשבועות הקרובים' },
+    { emoji: '🤢', title: 'בחילות פוחתות', tip: 'לרוב נעלמות עד שבוע 14-16' },
+    { emoji: '🤰', title: 'הבטן מתחילה להיראות', tip: 'עכשיו בטוח לספר לכולם!' },
+    { emoji: '🌙', title: 'שינה יותר נוחה', tip: 'התחילי לישון על הצד - עדיף שמאלי' },
+    { emoji: '💆', title: 'הקלה רגשית', tip: 'עברת את השלב הכי מאתגר - כל הכבוד!' },
+  ]},
+  { range: [14,15], items: [
+    { emoji: '⚡', title: 'אנרגיה חוזרת', tip: 'ברוכה הבאה לשליש השני!' },
+    { emoji: '🤰', title: 'הבטן גדלה', tip: 'משחת שמן לבטן תמנע סימני מתיחה' },
+    { emoji: '😁', title: 'מצב רוח טוב יותר', tip: 'הורמונים מתאזנים - תהני מזה!' },
+    { emoji: '🔥', title: 'צרבת מתחילה', tip: 'הימני ממאכלים חריפים וחמוצים' },
+    { emoji: '🦵', title: 'כאבי רצועות', tip: 'כאב חד בבטן - נורמלי, הרחם גדל' },
+    { emoji: '💄', title: 'עור זוהר', tip: 'הריון זוהר - תהני ממנו!' },
+  ]},
+  { range: [16,17], items: [
+    { emoji: '⚡', title: 'תחושה מצוינת!', tip: 'שבועות 16-20 הם לרוב הכי נוחים' },
+    { emoji: '🤰', title: 'הבטן ברורה', tip: 'הגיע הזמן לבגדי הריון מלאים' },
+    { emoji: '🔥', title: 'צרבת', tip: 'ארוחות קטנות, אל תשכבי מיד אחרי אכילה' },
+    { emoji: '👃', title: 'אף סתום', tip: 'נפיחות של הקרום הרירי - נורמלי' },
+    { emoji: '💤', title: 'שינה משתפרת', tip: 'כרית בין הרגליים לנוחות מקסימלית' },
+    { emoji: '🧠', title: 'ערפל הריון', tip: 'אפשר לשכוח - רשמי הכל ביומן' },
+  ]},
+  { range: [18,20], items: [
+    { emoji: '🦋', title: 'תנועות ראשונות!', tip: 'כמו בועות או פרפרים - הנה היא!' },
+    { emoji: '🤰', title: 'בטן עגולה ויפה', tip: 'תצלמי - תרצי לזכור את זה' },
+    { emoji: '🔥', title: 'צרבת מוגברת', tip: 'אכלי לאט, לעסי טוב, קומי לאחר אכילה' },
+    { emoji: '💙', title: 'בדיקת מורפולוגיה', tip: 'שבוע 20 - בדיקה חשובה, תתכנני' },
+    { emoji: '🦵', title: 'עווית רגליים בלילה', tip: 'מגנזיום + מתיחות לפני השינה' },
+    { emoji: '😰', title: 'קוצר נשימה קל', tip: 'הרחם גדל ולוחץ - קחי אוויר עמוק' },
+  ]},
+  { range: [21,23], items: [
+    { emoji: '👊', title: 'בעיטות ברורות', tip: 'תעירי את בן הזוג - תנו לו לחוש!' },
+    { emoji: '🔥', title: 'צרבת מטרידה', tip: 'שנו עם ראש מורם, אכלי ערב מוקדם' },
+    { emoji: '🦶', title: 'נפיחות קלה ברגליים', tip: 'הרימי רגליים כשאפשר' },
+    { emoji: '🌙', title: 'קשיי שינה', tip: 'כרית U גדולה לנוחות מקסימלית' },
+    { emoji: '🔙', title: 'כאב גב', tip: 'שחייה ויוגה להריון עוזרים מאוד' },
+    { emoji: '😅', title: 'הזעה מוגברת', tip: 'לבשי בגדים נושמים, שתי מים קרים' },
+  ]},
+  { range: [24,26], items: [
+    { emoji: '👶', title: 'בעיטות חזקות', tip: 'ספרי 10 בעיטות ביום - סימן לתינוק בריא' },
+    { emoji: '🦶', title: 'נפיחות ברגליים', tip: 'הפחיתי מלח, הרימי רגליים, שתי מים' },
+    { emoji: '😴', title: 'עייפות חוזרת', tip: 'נורמלי - הגוף עובד קשה' },
+    { emoji: '🔥', title: 'צרבת חזקה', tip: 'גלידה מקלה! גם חלב קר' },
+    { emoji: '💉', title: 'בדיקת סוכר', tip: 'שבוע 24-28 - בדיקת OGTT חשובה' },
+    { emoji: '🎵', title: 'העובר שומע', tip: 'שירי לו - הוא כבר שומע ומגיב!' },
+  ]},
+  { range: [27,29], items: [
+    { emoji: '🎊', title: 'שליש שלישי!', tip: 'עוד רבע ותפגשי אותה/אותו!' },
+    { emoji: '😤', title: 'קשיי נשימה', tip: 'הרחם לוחץ על הסרעפת - שבי זקופה' },
+    { emoji: '🦶', title: 'נפיחות גוברת', tip: 'מקלחות קרות + גרביים תומכות' },
+    { emoji: '💪', title: 'צירי ברקסטון היקס', tip: 'צירים לא סדירים - אימון הרחם, לא לידה' },
+    { emoji: '🌙', title: 'שינה קשה', tip: 'כרית בין ברכיים + מתחת לבטן' },
+    { emoji: '🔙', title: 'כאב גב חזק', tip: 'פיזיותרפיסטית להריון - ממליצה מאוד' },
+  ]},
+  { range: [30,32], items: [
+    { emoji: '😤', title: 'נשימה קצרה', tip: 'נשמי עמוק, שבי זקופה, הימני ממאמץ' },
+    { emoji: '🦶', title: 'נפיחות ברגליים וידיים', tip: 'אם הנפיחות חדה - פני לרופא' },
+    { emoji: '💪', title: 'צירים מתכוננים', tip: 'צירי ברקסטון הופכים תכופים יותר' },
+    { emoji: '🚽', title: 'לחץ על השלפוחית', tip: 'שתי מים אבל הגבילי לפני שינה' },
+    { emoji: '🍔', title: 'צרבת חזקה מאוד', tip: 'ישני עם גב מורם, אכלי קטן ותכוף' },
+    { emoji: '😰', title: 'חרדת לידה', tip: 'קורס לידה, נשימות, שיחה עם מיילדת' },
+  ]},
+  { range: [33,35], items: [
+    { emoji: '🏋️', title: 'כובד וקושי בתנועה', tip: 'קחי את הזמן, אל תמהרי' },
+    { emoji: '😴', title: 'עייפות כבדה', tip: 'נוחי כמה שיותר לפני הלידה' },
+    { emoji: '💪', title: 'צירים תכופים יותר', tip: 'אם כל 5 דקות - לבית חולים' },
+    { emoji: '🧠', title: 'עומס רגשי', tip: 'הכיני את התיק, תכנני - זה מרגיע' },
+    { emoji: '🔙', title: 'כאבי אגן', tip: 'פיזיותרפיה + חגורת תמיכה לבטן' },
+    { emoji: '👶', title: 'העובר יורד למטה', tip: 'תרגישי לחץ על האגן - שלב טבעי' },
+  ]},
+  { range: [36,38], items: [
+    { emoji: '🏥', title: 'הכני תיק לבית חולים', tip: 'בגדים, תעודות, טעינות - הכי חשוב!' },
+    { emoji: '💪', title: 'צירים סדירים יותר', tip: 'אם כל 5-7 דקות + 1 דקה - לצאת' },
+    { emoji: '🚽', title: 'לחץ חזק על האגן', tip: 'הראש יורד - לידה מתקרבת' },
+    { emoji: '😴', title: 'שינה כמעט בלתי אפשרית', tip: 'נוחי על הצד, כריות מכל הצדדים' },
+    { emoji: '🫗', title: 'הדלפות קלות', tip: 'אם פקק ריר/דם - אותת לידה קרובה' },
+    { emoji: '💆', title: 'חרדה ורגש', tip: 'נשמי, את מוכנה. גופך יודע מה לעשות!' },
+  ]},
+  { range: [39,42], items: [
+    { emoji: '🎊', title: 'כמעט שם!', tip: 'כל יום שעובר הוא ניצחון!' },
+    { emoji: '💪', title: 'צירים - מתי לצאת?', tip: 'כל 5 דקות, מנה דקה, שעה שלמה - לצאת!' },
+    { emoji: '🌊', title: 'שבירת מים', tip: 'מים שוברים? לבית חולים מיד' },
+    { emoji: '😌', title: 'שקט לפני הסערה', tip: 'נוחי, אכלי קל, שמרי אנרגיה' },
+    { emoji: '💕', title: 'עוד קצת', tip: 'בקרוב תחזיקי אותה/אותו בידיים!' },
+    { emoji: '🏥', title: 'תיק מוכן?', tip: 'בדקי שוב: ניירות, בגדים לתינוק, מטען' },
+  ]},
+];
+
+function getSymptomsForWeek(week: number) {
+  return SYMPTOMS_BY_WEEK.find(s => week >= s.range[0] && week <= s.range[1])?.items ?? SYMPTOMS_BY_WEEK[0].items;
+}
 
 const RECIPES = [
   { emoji: '🍌', name: 'שייק בננה וג׳ינג׳ר', time: '5 דק׳', trimester: ['first'],
@@ -131,13 +231,49 @@ const RECIPES = [
     steps: ['טחני שקדים ותמרים בפוד פרוססור', 'הוסיפי קקאו וערבבי', 'צרי כדורים', 'גלגלי בקוקוס'] },
 ];
 
-const TIPS = [
-  { emoji: '🥦', text: 'ברוקולי עשיר בחומצה פולית - מומלץ מאוד!' },
-  { emoji: '💧', text: 'שתי 8-10 כוסות מים ביום' },
-  { emoji: '🐟', text: 'סלמון מבושל - מקור מצוין לאומגה 3' },
-  { emoji: '🥑', text: 'אבוקדו עשיר בחומצה פולית ואשלגן' },
-  { emoji: '🥛', text: '3 מנות חלב ביום לסידן חיוני' },
-];
+const TIPS_BY_WEEK: Record<number, { emoji: string; text: string }> = {
+  4:  { emoji: '💊', text: 'התחילי חומצה פולית אם עדיין לא - חיונית מאוד עכשיו!' },
+  5:  { emoji: '🥦', text: 'ברוקולי ותרד עשירים בחומצה פולית - הוסיפי לכל ארוחה' },
+  6:  { emoji: '🫚', text: 'ג׳ינג׳ר טרי בתה או בשייק - עוזר מאוד לבחילות' },
+  7:  { emoji: '🍪', text: 'ביסקוויט יבש ליד המיטה - אכלי לפני שקמת בבוקר' },
+  8:  { emoji: '💧', text: 'שתי לאט לאט - לגימות קטנות לאורך היום עוזרות לבחילה' },
+  9:  { emoji: '🥛', text: 'סידן חשוב עכשיו - 3 מנות חלב ביום או תחליפים' },
+  10: { emoji: '🥩', text: 'ברזל חיוני - בשר בקר, קטניות ועלים ירוקים' },
+  11: { emoji: '🥜', text: 'שקדים ואגוזים - חטיף מושלם עשיר בחלבון ומגנזיום' },
+  12: { emoji: '🎉', text: 'סוף שליש ראשון! הסיכון ירד - אפשר לספר לכולם' },
+  13: { emoji: '🥑', text: 'אבוקדו עשיר בחומצה פולית ואשלגן - הוסיפי לכל מקום' },
+  14: { emoji: '🐟', text: 'סלמון מבושל - אומגה 3 לפיתוח מוח התינוק' },
+  15: { emoji: '🥕', text: 'גזר ובטטה - ויטמין A לעיניים ועור בריא לתינוק' },
+  16: { emoji: '🫐', text: 'פירות יער - נוגדי חמצון מצוינים לך ולתינוק' },
+  17: { emoji: '🥚', text: 'ביצים - חלבון שלם + כולין לפיתוח מוח התינוק' },
+  18: { emoji: '🌰', text: 'אגוזי מלך - אומגה 3 צמחי מצוין, חופן ביום' },
+  19: { emoji: '🧀', text: 'גבינות קשות מפוסטרות - מקור סידן בטוח ומצוין' },
+  20: { emoji: '💧', text: 'חצי הדרך! שתי 2 ליטר מים ביום - חשוב מאוד' },
+  21: { emoji: '🫘', text: 'קטניות - עדשים, חומוס, שעועית - ברזל + חלבון + סיבים' },
+  22: { emoji: '🥦', text: 'ברוקולי - סידן, ברזל וחומצה פולית בירק אחד!' },
+  23: { emoji: '🍌', text: 'בננה - אשלגן נגד עוויתות רגליים בלילה' },
+  24: { emoji: '🌾', text: 'דגנים מלאים - אנרגיה יציבה לאורך היום' },
+  25: { emoji: '🐟', text: 'דגים עשירי אומגה 3 - סלמון, סרדינים, מוסר ים' },
+  26: { emoji: '🥛', text: 'הכפילי סידן עכשיו - העצמות של התינוק בונות בקצב מהיר' },
+  27: { emoji: '🥩', text: 'ברזל חשוב מאוד עכשיו - בשר, קטניות + ויטמין C לספיגה' },
+  28: { emoji: '💊', text: 'ויטמין D - שאלי רופא לגבי תוספים אם לא יוצאת לשמש' },
+  29: { emoji: '🍠', text: 'בטטה - עשירה בוויטמין A ואשלגן, מתוקה וטעימה' },
+  30: { emoji: '🥑', text: 'שומנים בריאים - אבוקדו, שמן זית, אגוזים - לפיתוח המוח' },
+  31: { emoji: '🫐', text: 'פירות יער קפואים - נוחים, זולים ועשירים בנוגדי חמצון' },
+  32: { emoji: '💧', text: 'שתיית מים מונעת צירי ברקסטון - לפחות 8 כוסות ביום' },
+  33: { emoji: '🌰', text: 'שקדים - מגנזיום לשינה טובה יותר ולהפחתת עוויתות' },
+  34: { emoji: '🥦', text: 'ירקות ירוקים - ברזל לך ולתינוק לקראת הלידה' },
+  35: { emoji: '🍗', text: 'חלבון מלא - עוף, הודו, דגים - לבנייה אחרונה של השרירים' },
+  36: { emoji: '🫚', text: 'שמן קשרי תמר - מחקרים מראים שעשוי לעזור בלידה' },
+  37: { emoji: '🍵', text: 'תה עלי פטל אדום - מסורתית מומלץ לשבועות אחרונים' },
+  38: { emoji: '💧', text: 'שתי הרבה מים - מכינה את הגוף ללידה' },
+  39: { emoji: '🍫', text: 'שוקולד מריר קטן ביום - מגנזיום + אושר!' },
+  40: { emoji: '🎊', text: 'בכל יום שעובר התינוק מוכן יותר - עוד קצת סבלנות!' },
+};
+
+function getTipForWeek(week: number) {
+  return TIPS_BY_WEEK[week] ?? TIPS_BY_WEEK[Math.max(4, Math.min(40, week))];
+}
 
 export default function Home() {
   const [week, setWeek] = useState<number | null>(null);
@@ -150,7 +286,6 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [ocrProgress, setOcrProgress] = useState(0);
-  const [tipIndex, setTipIndex] = useState(0);
   const [selectedMenuItem, setSelectedMenuItem] = useState<string | null>(null);
   const [showSymptoms, setShowSymptoms] = useState(false);
   const [showRecipes, setShowRecipes] = useState(false);
@@ -159,9 +294,6 @@ export default function Home() {
   const [photoQuery, setPhotoQuery] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    setTipIndex(Math.floor(Math.random() * TIPS.length));
-  }, []);
 
   const trimester = week ? (week <= 13 ? 1 : week <= 26 ? 2 : 3) : null;
   const trimesterLabel = trimester === 1 ? 'שליש ראשון' : trimester === 2 ? 'שליש שני' : 'שליש שלישי';
@@ -312,8 +444,8 @@ export default function Home() {
 
               {/* Tip */}
               <div className="rounded-xl p-3 flex gap-3 items-center" style={{ background: '#fffbeb', border: '1px solid #fde68a' }}>
-                <span className="text-2xl">{TIPS[tipIndex].emoji}</span>
-                <p className="text-xs text-amber-700 leading-relaxed">{TIPS[tipIndex].text}</p>
+                <span className="text-2xl">{getTipForWeek(5).emoji}</span>
+                <p className="text-xs text-amber-700 leading-relaxed">{getTipForWeek(5).text}</p>
               </div>
             </div>
 
@@ -380,10 +512,10 @@ export default function Home() {
 
         {/* Tip banner */}
         <div className="rounded-2xl p-3.5 flex items-center gap-3" style={{ background: 'linear-gradient(135deg, #fffbeb, #fef9c3)', border: '1px solid #fde68a' }}>
-          <span className="text-2xl">{TIPS[tipIndex].emoji}</span>
+          <span className="text-2xl">{getTipForWeek(week!).emoji}</span>
           <div>
             <p className="text-xs font-bold text-amber-700 mb-0.5">טיפ לשבוע {week}</p>
-            <p className="text-xs text-amber-600">{TIPS[tipIndex].text}</p>
+            <p className="text-xs text-amber-600">{getTipForWeek(week!).text}</p>
           </div>
         </div>
 
@@ -422,8 +554,7 @@ export default function Home() {
 
         {/* Symptoms Card */}
         {week && (() => {
-          const trimesterKey = week <= 13 ? 'first' : week <= 26 ? 'second' : 'third';
-          const symptoms = SYMPTOMS[trimesterKey];
+          const symptoms = getSymptomsForWeek(week);
           return (
             <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.95)', boxShadow: '0 2px 16px rgba(0,0,0,0.08)', border: '1px solid rgba(139,92,246,0.15)' }}>
               <button className="w-full" onClick={() => setShowSymptoms(s => !s)}>
@@ -434,7 +565,7 @@ export default function Home() {
                       style={{ background: 'linear-gradient(135deg, #ede9fe, #fce7f3)' }}>🩺</div>
                     <div className="text-right">
                       <p className="font-black text-gray-800 text-sm">תסמינים לשבוע {week}</p>
-                      <p className="text-xs text-purple-400">{trimesterKey === 'first' ? 'שליש ראשון' : trimesterKey === 'second' ? 'שליש שני' : 'שליש שלישי'} • {symptoms.length} תסמינים נפוצים</p>
+                      <p className="text-xs text-purple-400">{symptoms.length} תסמינים נפוצים לשבוע זה</p>
                     </div>
                   </div>
                   <span className="text-gray-300 text-lg transition-transform" style={{ transform: showSymptoms ? 'rotate(180deg)' : 'none' }}>▾</span>
@@ -442,7 +573,7 @@ export default function Home() {
               </button>
               {showSymptoms && (
                 <div className="px-4 pb-4 grid grid-cols-2 gap-2">
-                  {symptoms.map((s, i) => (
+                  {symptoms.map((s: { emoji: string; title: string; tip: string }, i: number) => (
                     <div key={i} className="rounded-xl p-3" style={{ background: 'linear-gradient(135deg, #faf5ff, #fdf2f8)', border: '1px solid rgba(139,92,246,0.1)' }}>
                       <div className="text-2xl mb-1.5">{s.emoji}</div>
                       <p className="font-bold text-gray-700 text-xs mb-1">{s.title}</p>
