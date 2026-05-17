@@ -99,6 +99,36 @@ const RECIPES = [
   { emoji: '🥦', name: 'עוף עם ברוקולי', time: '30 דק׳', trimester: ['third'],
     ingredients: ['חזה עוף', 'ברוקולי גדול', 'שן שום + ג׳ינג׳ר', 'רוטב סויה דל נתרן'],
     steps: ['חתכי עוף לקוביות ובשלי', 'הוסיפי ברוקולי 5 דקות לפני הסוף', 'תבל ברוטב סויה וג׳ינג׳ר'] },
+  // More first trimester - anti-nausea, easy to digest
+  { emoji: '🫚', name: 'טוסט אבוקדו ולימון', time: '5 דק׳', trimester: ['first','second'],
+    ingredients: ['פרוסת לחם מלא', 'חצי אבוקדו', 'מיץ לימון', 'מלח גס + פלפל'],
+    steps: ['קלי לחם', 'מעכי אבוקדו עם לימון', 'מרחי על הלחם', 'תבלי במלח ופלפל'] },
+  { emoji: '🥛', name: 'פודינג צ׳יה עם בננה', time: '10 דק׳ + לילה', trimester: ['first','second','third'],
+    ingredients: ['3 כפות זרעי צ׳יה', 'כוס חלב שקדים', 'בננה', 'כפית דבש'],
+    steps: ['ערבבי צ׳יה עם חלב ודבש', 'שמי במקרר ללילה', 'בבוקר הוסיפי בננה פרוסה'] },
+  { emoji: '🫐', name: 'יוגורט עם פירות יער', time: '3 דק׳', trimester: ['first','second','third'],
+    ingredients: ['גביע יוגורט יווני', 'חופן פירות יער קפואים', 'גרנולה', 'כפית דבש'],
+    steps: ['שימי יוגורט בקערה', 'הוסיפי פירות יער', 'פזרי גרנולה ודבש'] },
+  // Second trimester - iron, calcium, protein
+  { emoji: '🥩', name: 'בקר מוקפץ עם ירקות', time: '20 דק׳', trimester: ['second','third'],
+    ingredients: ['200 גר׳ בשר בקר רזה', 'פלפלים + קישוא', 'שום + ג׳ינג׳ר', 'רוטב סויה'],
+    steps: ['חתכי בשר לפסים דקים', 'הקפיצי על אש גבוהה', 'הוסיפי ירקות 3 דקות', 'תבל ברוטב סויה'] },
+  { emoji: '🧆', name: 'חומוס ביתי עם שמן זית', time: '10 דק׳', trimester: ['first','second','third'],
+    ingredients: ['קופסת חומוס מבושל', 'טחינה גולמית', 'לימון + שום', 'שמן זית + פפריקה'],
+    steps: ['טחני חומוס עם טחינה ולימון', 'הוסיפי שום ומלח לפי טעם', 'הגישי עם שמן זית ופפריקה'] },
+  { emoji: '🥕', name: 'מרק גזר וג׳ינג׳ר', time: '25 דק׳', trimester: ['first','second','third'],
+    ingredients: ['5 גזרים גדולים', 'פיסת ג׳ינג׳ר טרי', 'בצל + שום', 'שמן זית + מלח'],
+    steps: ['טגני בצל ושום', 'הוסיפי גזר חתוך וג׳ינג׳ר', 'כסי במים ובשלי 20 דקות', 'טחני עד חלק'] },
+  // Third trimester - iron, fiber, light
+  { emoji: '🫘', name: 'קדרת שעועית ועגבניות', time: '30 דק׳', trimester: ['second','third'],
+    ingredients: ['קופסת שעועית לבנה', 'עגבניות מרוסקות', 'בצל + שום + כמון', 'פלפל אדום'],
+    steps: ['טגני בצל ושום', 'הוסיפי עגבניות וכמון', 'הוסיפי שעועית ובשלי 15 דקות', 'הגישי עם לחם'] },
+  { emoji: '🍠', name: 'בטטה אפויה עם גבינה', time: '45 דק׳', trimester: ['second','third'],
+    ingredients: ['בטטה גדולה', 'גבינה צהובה מגוררת', 'שמנת חמוצה', 'ירוקים'],
+    steps: ['אפי בטטה שלמה ב-200° כ-40 דקות', 'חצי ופרוסי מעט', 'מלאי בגבינה ושמנת', 'הגישי עם עשבי תיבול'] },
+  { emoji: '🥜', name: 'כדורי שקדים ותמרים', time: '15 דק׳', trimester: ['first','second','third'],
+    ingredients: ['10 תמרים מגולענים', 'כוס שקדים', 'כף קקאו', 'קוקוס טחון לציפוי'],
+    steps: ['טחני שקדים ותמרים בפוד פרוססור', 'הוסיפי קקאו וערבבי', 'צרי כדורים', 'גלגלי בקוקוס'] },
 ];
 
 const TIPS = [
@@ -125,6 +155,8 @@ export default function Home() {
   const [showSymptoms, setShowSymptoms] = useState(false);
   const [showRecipes, setShowRecipes] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState<number | null>(null);
+  const [photoFallback, setPhotoFallback] = useState(false);
+  const [photoQuery, setPhotoQuery] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -150,7 +182,7 @@ export default function Home() {
   async function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    setLoading(true); setError(''); setMenuItems([]);
+    setLoading(true); setError(''); setMenuItems([]); setPhotoFallback(false); setPhotoQuery('');
     try {
       const { data } = await Tesseract.recognize(file, 'heb+eng', {
         logger: (m: { status: string; progress: number }) => {
@@ -158,7 +190,11 @@ export default function Home() {
         }
       });
       const lines = data.text.split('\n').map((l: string) => l.trim()).filter((l: string) => l.length > 2);
-      analyzeMenuItems(lines);
+      if (lines.length < 2) {
+        setPhotoFallback(true);
+      } else {
+        analyzeMenuItems(lines);
+      }
     } catch { setError('שגיאה בקריאת התמונה. נסי שוב עם תמונה ברורה יותר.'); }
     setLoading(false); setOcrProgress(0);
   }
@@ -583,6 +619,31 @@ export default function Home() {
               </div>
             </div>
             {error && <ErrorCard message={error} />}
+            {photoFallback && (
+              <div className="rounded-2xl p-5 animate-fadein" style={{ background: 'rgba(255,255,255,0.95)', boxShadow: '0 2px 16px rgba(0,0,0,0.08)', border: '1px solid rgba(34,197,94,0.2)' }}>
+                <div className="text-center mb-4">
+                  <div className="text-4xl mb-2">🍽️</div>
+                  <p className="font-black text-gray-800">צילמת מנה?</p>
+                  <p className="text-sm text-gray-400 mt-1">לא זיהיתי טקסט בתמונה.<br/>כתבי מה האוכל ואבדוק בשבילך!</p>
+                </div>
+                <div className="relative mb-3">
+                  <input type="text" value={photoQuery}
+                    onChange={e => setPhotoQuery(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter' && photoQuery.trim()) { handleSearch(photoQuery); setMode('search'); } }}
+                    placeholder="למשל: סושי, עוף צלוי, גבינה..."
+                    className="w-full rounded-xl px-4 py-3.5 text-right font-medium transition-all"
+                    style={{ border: '2px solid #86efac', background: '#f0fdf4', fontSize: 15 }}
+                    autoFocus
+                  />
+                </div>
+                <button
+                  onClick={() => { if (photoQuery.trim()) { handleSearch(photoQuery); setMode('search'); } }}
+                  className="w-full text-white font-black py-3.5 rounded-2xl text-base"
+                  style={{ background: 'linear-gradient(135deg, #22c55e, #15803d)', boxShadow: '0 5px 18px rgba(34,197,94,0.35)' }}>
+                  בדקי אם מותר בהריון ✓
+                </button>
+              </div>
+            )}
             {menuItems.length > 0 && <MenuList items={menuItems} onSelect={setSelectedMenuItem} />}
           </div>
         )}
