@@ -47,6 +47,60 @@ const WEEK_DATA: Record<number, { fruit: string; emoji: string; facts: string[] 
   40: { fruit: 'אבטיח', emoji: '🍉', facts: ['כ-3.5 ק"ג', 'מוכן לצאת לעולם!', 'מזל טוב - נס של חיים! 💕'] },
 };
 
+const SYMPTOMS: Record<string, { emoji: string; title: string; tip: string }[]> = {
+  first: [
+    { emoji: '🤢', title: 'בחילות בוקר', tip: 'ביסקוויט יבש לפני קימה, ג׳ינג׳ר ולימון עוזרים' },
+    { emoji: '😴', title: 'עייפות קיצונית', tip: 'גופך בונה שליה - מנוחה היא הכרחית' },
+    { emoji: '👃', title: 'רגישות לריחות', tip: 'הימני ממה שמגרה - יעבור בשליש שני' },
+    { emoji: '💛', title: 'רגישות בחזה', tip: 'חזייה תומכת טובה תעזור מאוד' },
+    { emoji: '🚽', title: 'תכיפות למתן שתן', tip: 'הרחם לוחץ על שלפוחית השתן - נורמלי' },
+    { emoji: '😢', title: 'שינויי מצב רוח', tip: 'ההורמונים בשיא - מותר לבכות!' },
+  ],
+  second: [
+    { emoji: '⚡', title: 'אנרגיה חוזרת', tip: 'השליש השני הוא לרוב הנוח ביותר!' },
+    { emoji: '🤰', title: 'הבטן מתעגלת', tip: 'משחת לחות תמנע סימני מתיחה' },
+    { emoji: '🦋', title: 'תנועות ראשונות', tip: 'סביב שבוע 18-20 תרגישי "פרפרים"' },
+    { emoji: '🔥', title: 'צרבת', tip: 'ארוחות קטנות ותכופות + הימני ממאכלים חריפים' },
+    { emoji: '😵‍💫', title: 'סחרחורות קלות', tip: 'קומי לאט, שתי מים, אכלי בקביעות' },
+    { emoji: '🦷', title: 'רגישות בחניכיים', tip: 'צחצוח עדין + פגישה עם רופא שיניים' },
+  ],
+  third: [
+    { emoji: '😤', title: 'קשיי נשימה קלים', tip: 'העובר לוחץ על הסרעפת - נורמלי' },
+    { emoji: '🦶', title: 'נפיחות ברגליים', tip: 'הגבהי רגליים, הפחיתי מלח, שתי מים' },
+    { emoji: '💪', title: 'צירי ברקסטון היקס', tip: 'צירים לא סדירים = אימון של הרחם' },
+    { emoji: '🌙', title: 'קשיי שינה', tip: 'כרית בין הרגליים ומתחת לבטן' },
+    { emoji: '🔙', title: 'כאבי גב תחתון', tip: 'שחייה ועמידה נכונה מפחיתות מאוד' },
+    { emoji: '🚿', title: 'חום ורגישות בגוף', tip: 'מקלחות פושרות ולבוש נוח ונושם' },
+  ],
+};
+
+const RECIPES = [
+  { emoji: '🍌', name: 'שייק בננה וג׳ינג׳ר', time: '5 דק׳', trimester: ['first'],
+    ingredients: ['בננה קפואה', 'כוס חלב', 'פיסת ג׳ינג׳ר טרי', 'כפית דבש'],
+    steps: ['שימי הכל בבלנדר', 'טחני 30 שניות', 'שתי קר - מעולה לבחילות'] },
+  { emoji: '🥚', name: 'ביצה מקושקשת עם גבינה', time: '7 דק׳', trimester: ['first','second','third'],
+    ingredients: ['2 ביצים', 'כף גבינה צפתית', 'מעט חמאה', 'מלח ופלפל'],
+    steps: ['חממי מחבת על אש נמוכה', 'טרפי ביצים עם גבינה', 'בשלי תוך ערבוב עדין'] },
+  { emoji: '🥣', name: 'שיבולת שועל עם פירות', time: '5 דק׳', trimester: ['first'],
+    ingredients: ['חצי כוס שיבולת שועל', 'כוס חלב', 'בננה', 'כפית דבש'],
+    steps: ['בשלי שיבולת שועל בחלב 3 דקות', 'הוסיפי בננה חתוכה', 'טפטפי דבש'] },
+  { emoji: '🥗', name: 'סלט עוף ואבוקדו', time: '15 דק׳', trimester: ['second','third'],
+    ingredients: ['חזה עוף מבושל', 'אבוקדו', 'עגבנייה', 'לימון + שמן זית'],
+    steps: ['בשלי עוף עד הכנה מלאה', 'חתכי לקוביות', 'ערבבי עם אבוקדו ועגבנייה', 'תבלי בלימון ושמן זית'] },
+  { emoji: '🐟', name: 'סלמון אפוי עם ירקות', time: '25 דק׳', trimester: ['second','third'],
+    ingredients: ['פילה סלמון', 'ברוקולי', 'גזר', 'שמן זית + לימון + שום'],
+    steps: ['חממי תנור ל-180°', 'ערכי הכל בתבנית', 'אפי 20 דקות - הסלמון מוכן כשמתפורר'] },
+  { emoji: '🍲', name: 'מרק עדשים עם ירקות', time: '30 דק׳', trimester: ['first','second','third'],
+    ingredients: ['כוס עדשים כתומות', 'גזר + סלרי + בצל', 'כמון + כורכום', 'מלח'],
+    steps: ['טגני בצל עד שקיפות', 'הוסיפי ירקות ועדשים', 'כסי במים ובשלי 25 דקות', 'תבל והגישי'] },
+  { emoji: '🥙', name: 'פיתה עם חומוס וירקות', time: '5 דק׳', trimester: ['first','second','third'],
+    ingredients: ['פיתה מלאה', 'חומוס', 'מלפפון + עגבנייה + פלפל', 'טחינה'],
+    steps: ['פתחי פיתה', 'מרחי חומוס נדיב', 'מלאי בירקות טריים', 'טפטפי טחינה'] },
+  { emoji: '🥦', name: 'עוף עם ברוקולי', time: '30 דק׳', trimester: ['third'],
+    ingredients: ['חזה עוף', 'ברוקולי גדול', 'שן שום + ג׳ינג׳ר', 'רוטב סויה דל נתרן'],
+    steps: ['חתכי עוף לקוביות ובשלי', 'הוסיפי ברוקולי 5 דקות לפני הסוף', 'תבל ברוטב סויה וג׳ינג׳ר'] },
+];
+
 const TIPS = [
   { emoji: '🥦', text: 'ברוקולי עשיר בחומצה פולית - מומלץ מאוד!' },
   { emoji: '💧', text: 'שתי 8-10 כוסות מים ביום' },
@@ -68,6 +122,9 @@ export default function Home() {
   const [ocrProgress, setOcrProgress] = useState(0);
   const [tipIndex, setTipIndex] = useState(0);
   const [selectedMenuItem, setSelectedMenuItem] = useState<string | null>(null);
+  const [showSymptoms, setShowSymptoms] = useState(false);
+  const [showRecipes, setShowRecipes] = useState(false);
+  const [selectedRecipe, setSelectedRecipe] = useState<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -323,6 +380,102 @@ export default function Home() {
                   ))}
                 </div>
               </div>
+            </div>
+          );
+        })()}
+
+        {/* Symptoms Card */}
+        {week && (() => {
+          const trimesterKey = week <= 13 ? 'first' : week <= 26 ? 'second' : 'third';
+          const symptoms = SYMPTOMS[trimesterKey];
+          return (
+            <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.95)', boxShadow: '0 2px 16px rgba(0,0,0,0.08)', border: '1px solid rgba(139,92,246,0.15)' }}>
+              <button className="w-full" onClick={() => setShowSymptoms(s => !s)}>
+                <div className="h-1" style={{ background: 'linear-gradient(90deg, #8b5cf6, #ec4899)' }} />
+                <div className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-2xl"
+                      style={{ background: 'linear-gradient(135deg, #ede9fe, #fce7f3)' }}>🩺</div>
+                    <div className="text-right">
+                      <p className="font-black text-gray-800 text-sm">תסמינים לשבוע {week}</p>
+                      <p className="text-xs text-purple-400">{trimesterKey === 'first' ? 'שליש ראשון' : trimesterKey === 'second' ? 'שליש שני' : 'שליש שלישי'} • {symptoms.length} תסמינים נפוצים</p>
+                    </div>
+                  </div>
+                  <span className="text-gray-300 text-lg transition-transform" style={{ transform: showSymptoms ? 'rotate(180deg)' : 'none' }}>▾</span>
+                </div>
+              </button>
+              {showSymptoms && (
+                <div className="px-4 pb-4 grid grid-cols-2 gap-2">
+                  {symptoms.map((s, i) => (
+                    <div key={i} className="rounded-xl p-3" style={{ background: 'linear-gradient(135deg, #faf5ff, #fdf2f8)', border: '1px solid rgba(139,92,246,0.1)' }}>
+                      <div className="text-2xl mb-1.5">{s.emoji}</div>
+                      <p className="font-bold text-gray-700 text-xs mb-1">{s.title}</p>
+                      <p className="text-xs text-purple-500 leading-relaxed">{s.tip}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+        {/* Recipes Card */}
+        {week && (() => {
+          const trimesterKey = week <= 13 ? 'first' : week <= 26 ? 'second' : 'third';
+          const recipes = RECIPES.filter(r => r.trimester.includes(trimesterKey));
+          return (
+            <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.95)', boxShadow: '0 2px 16px rgba(0,0,0,0.08)', border: '1px solid rgba(251,146,60,0.2)' }}>
+              <button className="w-full" onClick={() => setShowRecipes(r => !r)}>
+                <div className="h-1" style={{ background: 'linear-gradient(90deg, #f97316, #f59e0b)' }} />
+                <div className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-2xl"
+                      style={{ background: 'linear-gradient(135deg, #fff7ed, #fef9c3)' }}>👩‍🍳</div>
+                    <div className="text-right">
+                      <p className="font-black text-gray-800 text-sm">מתכונים בטוחים</p>
+                      <p className="text-xs text-orange-400">{recipes.length} מתכונים מומלצים לשבוע {week}</p>
+                    </div>
+                  </div>
+                  <span className="text-gray-300 text-lg transition-transform" style={{ transform: showRecipes ? 'rotate(180deg)' : 'none' }}>▾</span>
+                </div>
+              </button>
+              {showRecipes && (
+                <div className="px-4 pb-4 space-y-2">
+                  {recipes.map((r, i) => (
+                    <div key={i}>
+                      <button className="w-full rounded-xl p-3 text-right transition-all"
+                        style={{ background: selectedRecipe === i ? 'linear-gradient(135deg, #fff7ed, #fef3c7)' : '#fafafa', border: `1.5px solid ${selectedRecipe === i ? '#fed7aa' : '#f3f4f6'}` }}
+                        onClick={() => setSelectedRecipe(selectedRecipe === i ? null : i)}>
+                        <div className="flex items-center gap-3">
+                          <span className="text-3xl">{r.emoji}</span>
+                          <div className="flex-1">
+                            <p className="font-bold text-gray-800 text-sm">{r.name}</p>
+                            <p className="text-xs text-orange-400">⏱ {r.time} • {r.ingredients.length} מרכיבים</p>
+                          </div>
+                          <span className="text-gray-300 text-sm">{selectedRecipe === i ? '▴' : '▾'}</span>
+                        </div>
+                      </button>
+                      {selectedRecipe === i && (
+                        <div className="rounded-xl p-3 mt-1" style={{ background: 'linear-gradient(135deg, #fffbeb, #fff7ed)', border: '1px solid #fed7aa' }}>
+                          <p className="text-xs font-bold text-orange-700 mb-2">🛒 מרכיבים:</p>
+                          <div className="flex flex-wrap gap-1.5 mb-3">
+                            {r.ingredients.map((ing, j) => (
+                              <span key={j} className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background: 'white', border: '1px solid #fed7aa', color: '#c2410c' }}>{ing}</span>
+                            ))}
+                          </div>
+                          <p className="text-xs font-bold text-orange-700 mb-2">👩‍🍳 אופן הכנה:</p>
+                          {r.steps.map((step, j) => (
+                            <div key={j} className="flex gap-2 mb-1">
+                              <span className="text-xs font-black text-orange-400 w-4 flex-shrink-0">{j + 1}.</span>
+                              <p className="text-xs text-gray-600">{step}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })()}
